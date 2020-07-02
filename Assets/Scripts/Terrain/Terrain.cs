@@ -18,38 +18,48 @@ public class Terrain : MonoBehaviour {
   private ChunkData chunk = new ChunkData();
 
   void Awake () {
+    transform.GetComponent<MeshFilter>().mesh = new Mesh();
     chunk.GenerateChunk();
-    chunk.TransformTiles();
-    CombineMesh();
+    chunk.GenerateChunk();
+    var combine = new CombineInstance[ChunkData.Length * chunk.layers.Count];
+
+    for(int i = 0; i < chunk.layers.Count; i++){
+      chunk.TransformTiles(chunk.layers[i], i);
+      CombineMesh(combine, i, chunk.layers[i]);
+    }
+
+    transform.GetComponent<MeshFilter>().mesh.CombineMeshes(combine, true);
   }
 
-  void CombineMesh () {
-    CombineInstance[] combine = new CombineInstance[ChunkData.Length];
+  void CombineMesh (CombineInstance[] combine, int index, Tile[,] tiles) {
 
-    chunk.Map((tile, i, arr) => {
-      if (tile.kind == Data.TileType.Empty) return;
-      var t = new GameObject(tile.name);
+    for (int i = 0; i < ChunkData.Length; i++) {
+      var x = i / Constants.CHUNK_SIZE;
+      var y = i % Constants.CHUNK_SIZE;
+
+      if (tiles[x, y].kind == Data.TileType.Empty) continue;
+
+      var t = new GameObject(tiles[x, y].name);
+
       var mf = t.AddComponent<MeshFilter>();
       var mr = t.AddComponent<MeshRenderer>();
 
-      mf.mesh = shapes[(int)tile.shape].mesh;
+      mf.mesh = shapes[(int)tiles[x, y].shape].mesh;
       mr.material = mat;
 
       t.transform.localScale *= 50;
-      t.transform.localRotation = Quaternion.Euler(-90, tile.rotation, 0);
-      t.transform.position = tile.position;
+      t.transform.localRotation = Quaternion.Euler(-90, tiles[x, y].rotation, 0);
+      t.transform.position = tiles[x, y].position;
 
-      combine[i].mesh = shapes[(int)tile.shape].mesh;
-      combine[i].transform = mf.transform.localToWorldMatrix;
+      combine[index * i].mesh = shapes[(int)tiles[x, y].shape].mesh;
+      combine[index * i].transform = mf.transform.localToWorldMatrix;
+
       if (!debug) {
         t.SetActive(false);
         Destroy(t);
       }
-    });
+    }
 
-    transform.GetComponent<MeshFilter>().mesh = new Mesh();
-    transform.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
-    transform.gameObject.SetActive(true);
   }
 }
 

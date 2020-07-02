@@ -13,12 +13,16 @@ public class Tile {
 
   public Tile (Vector3 p) {
     position = p;
-    if (Random.Range(0f, 1f) > 0.6f) {
-      kind = Data.TileType.Empty;
-    }
   }
 
-  public void UpdateShape (Tile[,] world, int x, int y) {
+  public void UpdateShape (List<Tile[,]> layers, int layerIndex, int x, int y) {
+    var world = layers[layerIndex];
+    var bottom = layers.ElementAtOrDefault(layerIndex - 1);
+
+    if (bottom != null && bottom[x, y].kind == Data.TileType.Empty) {
+      kind = Data.TileType.Empty;
+    }
+
     if (kind == Data.TileType.Empty) return;
     if (kind == Data.TileType.Half)  return;
 

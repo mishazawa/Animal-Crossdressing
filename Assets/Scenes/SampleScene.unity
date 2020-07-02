@@ -166,6 +166,7 @@ MonoBehaviour:
   - name: 5
     mesh: {fileID: 2443237146360861554, guid: cb37408d5f99b9e5595b9880eed45bc6, type: 3}
   mat: {fileID: 2100000, guid: 1c74b693333a6671db902f009ff96320, type: 2}
+  debug: 1
 --- !u!4 &389069706
 Transform:
   m_ObjectHideFlags: 0
